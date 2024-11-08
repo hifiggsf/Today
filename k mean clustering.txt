@@ -1,0 +1,34 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+
+# Load and preprocess data
+df = pd.read_csv("sales_data_sample.csv", encoding='ISO-8859-1')
+df = df.drop(['ADDRESSLINE1', 'ADDRESSLINE2', 'STATUS', 'POSTALCODE', 'CITY', 'TERRITORY', 'PHONE', 'STATE',
+              'CONTACTFIRSTNAME', 'CONTACTLASTNAME', 'CUSTOMERNAME', 'ORDERNUMBER', 'COUNTRY', 'PRODUCTLINE', 
+              'DEALSIZE', 'ORDERDATE'], axis=1)
+df = pd.concat([df, pd.get_dummies(df[['PRODUCTLINE', 'DEALSIZE']]), 
+                df['PRODUCTCODE'].astype('category').cat.codes.rename("PRODUCTCODE")], axis=1)
+
+# Determine optimal number of clusters using the Elbow Method
+distortions = [KMeans(n_clusters=k, random_state=2).fit(df).inertia_ for k in range(1, 10)]
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 10), distortions, 'bx-')
+plt.xlabel('k')
+plt.ylabel('Distortion')
+plt.title('Elbow Method for Optimal k')
+plt.show()
+
+# Apply K-Means clustering
+model = KMeans(n_clusters=3, random_state=2)
+predictions = model.fit_predict(df)
+
+# Display cluster counts
+cluster_counts = pd.DataFrame(np.unique(predictions, return_counts=True)[1], 
+                              index=['Cluster1', 'Cluster2', 'Cluster3'], columns=['Count'])
+print(cluster_counts)
+
+# Reduce data for 2D visualization with PCA
+reduced_X = pd.DataFrame(PCA(n_components=2).fit_transform(df), columns=['PCA1', 'PCA2'])

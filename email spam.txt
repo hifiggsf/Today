@@ -1,0 +1,32 @@
+import pandas as pd # Import necessary libraries
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import scale
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn import metrics
+import warnings
+warnings.filterwarnings('ignore')
+
+df = pd.read_csv('emails.csv') # Load and preprocess data for this 3 lines
+df.dropna(inplace=True)                # Remove missing values
+df.drop(['Email No.'], axis=1, inplace=True)  # Drop irrelevant column
+
+X = scale(df.drop(['Prediction'], axis=1))  # Define features and labels for this 2 lines # Standardize feature data
+y = df['Prediction']                         # Target variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) # Split into training and testing sets
+
+knn = KNeighborsClassifier(n_neighbors=7) # K-Nearest Neighbors Model from this onwards
+knn.fit(X_train, y_train)
+y_pred_knn = knn.predict(X_test)
+
+svm = SVC(kernel='linear') # Support Vector Machine Model from this onwards
+svm.fit(X_train, y_train)
+y_pred_svm = svm.predict(X_test)
+
+print("KNN Accuracy:", metrics.accuracy_score(y_test, y_pred_knn)) # Performance Metrics from this onwards
+print("KNN Confusion Matrix:\n", metrics.confusion_matrix(y_test, y_pred_knn))
+
+print("SVM Accuracy:", metrics.accuracy_score(y_test, y_pred_svm))
+print("SVM Confusion Matrix:\n", metrics.confusion_matrix(y_test, y_pred_svm))
