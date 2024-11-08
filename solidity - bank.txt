@@ -1,0 +1,35 @@
+pragma solidity >=0.7.0;
+
+contract Bank {
+    mapping(address => uint) private userAccount;
+    mapping(address => bool) private userExists;
+
+    function createAccount() public payable returns (string memory) {
+        require(!userExists[msg.sender], "Account already created!");
+        userAccount[msg.sender] = msg.value;
+        userExists[msg.sender] = true;
+        return "Account created";
+    }
+
+    function deposit(uint amount) public payable returns (string memory) {
+        require(userExists[msg.sender], "Account not created!");
+        require(amount > 0, "Amount should be greater than 0");
+        userAccount[msg.sender] += amount;
+        return "Amount deposited successfully";
+    }
+
+    function withdraw(uint amount) public returns (string memory) {
+        require(userExists[msg.sender], "Account not created!");
+        require(amount > 0 && userAccount[msg.sender] >= amount, "Insufficient balance or invalid amount");
+        userAccount[msg.sender] -= amount;
+        return "Amount withdrawn successfully";    
+    }
+
+    function accountBalance() public view returns (uint) {
+        return userAccount[msg.sender];
+    }
+
+    function accountExists() public view returns (bool) {
+        return userExists[msg.sender];
+    }
+}
